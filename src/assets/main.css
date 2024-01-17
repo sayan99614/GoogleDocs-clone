@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+.toolbar-icon{
+    @apply w-4 h-4 text-black;
+}
+
+.toolbar-icon-container{
+    @apply p-1 rounded-md cursor-pointer hover:bg-slate-300 bg-transparent;
+}
+
+.toolbar-line-gap{
+    @apply border-l-[1px] border-l-black h-5 opacity-25;
+}

@@ -1,6 +1,8 @@
 <template>
   <div class="md:mx-4">
-    <div class="w-full bg-[#edf2fa] p-2 md:rounded-full flex flex-wrap md:flex-nowrap gap-4 items-center">
+    <div
+      class="w-full bg-[#edf2fa] p-2 md:rounded-full flex flex-wrap md:flex-nowrap gap-4 items-center"
+    >
       <span class="toolbar-icon-container"><ArrowUturnLeftIcon class="toolbar-icon" /></span>
       <span class="toolbar-icon-container"><ArrowUturnRightIcon class="toolbar-icon" /></span>
       <span class="toolbar-icon-container"><PrinterIcon class="toolbar-icon" /></span>
@@ -8,7 +10,16 @@
         <option v-for="zoom in zoomValues" :key="zoom" value="zoom">{{ zoom }}%</option>
       </select>
       <div class="toolbar-line-gap"></div>
-      <select name="textType" id="textType" class="toolbar-icon-container outline-none">
+
+      <span class="toolbar-icon-container"
+        ><EllipsisVerticalIcon class="toolbar-icon md:hidden"
+      /></span>
+
+      <select
+        name="textType"
+        id="textType"
+        class="md:block hidden toolbar-icon-container outline-none"
+      >
         <option
           :selected="_type === 'Normal Text'"
           v-for="(_type, index) in textType"
@@ -18,8 +29,8 @@
           {{ _type }}
         </option>
       </select>
-      <div class="toolbar-line-gap"></div>
-      <div class="flex gap-2 items-center">
+      <div class="toolbar-line-gap hide-small"></div>
+      <div class="hidden md:flex gap-2 items-center">
         <span class="toolbar-icon-container"><PlusIcon class="toolbar-icon" /></span>
         <select
           name="textSize"
@@ -32,8 +43,8 @@
         </select>
         <span class="toolbar-icon-container"><MinusIcon class="toolbar-icon" /></span>
       </div>
-      <div class="toolbar-line-gap"></div>
-      <div class="flex items-center gap-3">
+      <div class="toolbar-line-gap hide-small"></div>
+      <div class="hidden md:flex items-center gap-3">
         <span class="toolbar-icon-container"
           ><div class="toolbar-icon font-bold flex items-center justify-center">B</div></span
         >
@@ -50,11 +61,14 @@
           </div></span
         >
       </div>
-      <div class="toolbar-line-gap"></div>
+      <div class="toolbar-line-gap hide-small"></div>
       <span class="hidden md:block lg:hidden toolbar-icon-container relative"
-        ><EllipsisVerticalIcon @click="showMdToolbar=!showMdToolbar" class="toolbar-icon" />
+        ><EllipsisVerticalIcon @click="showMdToolbar = !showMdToolbar" class="toolbar-icon" />
         <!-- for md size screens -->
-        <div v-show="showMdToolbar" class="absolute flex items-center p-2 gap-4 top-10 right-12 rounded-lg bg-[#edf2fa]">
+        <div
+          v-show="showMdToolbar"
+          class="absolute flex items-center p-2 gap-4 top-10 right-12 rounded-lg bg-[#edf2fa]"
+        >
           <span class="toolbar-icon-container"><LinkIcon class="toolbar-icon" /></span>
           <span class="toolbar-icon-container"><PhotoIcon class="toolbar-icon" /></span>
           <div class="toolbar-line-gap"></div>

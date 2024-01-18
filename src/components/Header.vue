@@ -3,7 +3,7 @@
     <div class="flex items-center gap-3">
       <img
         @click="router.replace('/')"
-        class="w-12 cursor-pointer"
+        class="w-8 h-8 md:w-12 cursor-pointer"
         src="@/assets/docs.png"
         alt="google docs logo"
       />
@@ -12,7 +12,7 @@
         <div>
           <input type="text" placeholder="Unnamed Doc" class="placeholder:text-black" />
         </div>
-        <div class="flex gap-3 cursor-pointer">
+        <div class="hidden md:flex gap-3 cursor-pointer">
           <p>File</p>
           <p>Edit</p>
           <p>View</p>
@@ -31,7 +31,7 @@
     </div>
     <div class="flex items-end justify-end cursor-pointer">
       <div class="flex gap-3">
-        <button class="bg-[#c2e7ff] rounded-full px-6 py-2 flex items-center gap-1">
+        <button class="bg-[#c2e7ff] hidden md:flex rounded-full px-6 py-2  items-center gap-1">
             <lock-closed-icon class="h-5 w-5"/>
             <p>Share</p>
         </button>

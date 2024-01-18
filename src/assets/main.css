@@ -15,3 +15,7 @@
 .toolbar-line-gap{
     @apply border-l-[1px] border-l-black h-5 opacity-25;
 }
+
+.hide-small{
+    @apply md:block hidden
+}

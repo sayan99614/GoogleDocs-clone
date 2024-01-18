@@ -1,8 +1,78 @@
 <template>
   <div class="md:mx-4">
     <div
-      class="w-full bg-[#edf2fa] p-2 md:rounded-full flex flex-wrap md:flex-nowrap gap-4 items-center"
+      class="w-full bg-[#edf2fa] p-2 md:rounded-full flex flex-wrap md:flex-nowrap gap-4 items-center relative"
     >
+
+
+     <!-- toolbar for mobile -->
+     <div v-if="showMobileToolbarExtra" class="absolute top-10 right-0 flex w-[100%] flex-wrap bg-[#edf2fa] gap-2 items-center md:hidden">
+          <select name="textType" id="textType" class="toolbar-icon-container outline-none">
+            <option
+              :selected="_type === 'Normal Text'"
+              v-for="(_type, index) in textType"
+              :key="index + _type[0]"
+              value="zoom"
+            >
+              {{ _type }}
+            </option>
+          </select>
+          <div class="flex gap-2 items-center">
+            <span class="toolbar-icon-container"><PlusIcon class="toolbar-icon" /></span>
+            <select
+              name="textSize"
+              id="textSize"
+              class="toolbar-icon-container outline-none border border-black"
+            >
+              <option :selected="size === 8" v-for="size in textSize" :key="size" value="zoom">
+                {{ size }}
+              </option>
+            </select>
+            <span class="toolbar-icon-container"><MinusIcon class="toolbar-icon" /></span>
+          </div>
+          <span class="toolbar-icon-container"
+            ><div class="toolbar-icon font-bold flex items-center justify-center">B</div></span
+          >
+          <span class="toolbar-icon-container"
+            ><div class="toolbar-icon font-bold flex items-center justify-center font-serif">
+              I
+            </div></span
+          >
+          <span class="toolbar-icon-container"
+            ><div
+              class="toolbar-icon font-bold flex items-center justify-center border-b-2 border-black"
+            >
+              U
+            </div></span
+          >
+
+          <span class="toolbar-icon-container"><LinkIcon class="toolbar-icon" /></span>
+          <span class="toolbar-icon-container"><PhotoIcon class="toolbar-icon" /></span>
+          <div class="toolbar-line-gap"></div>
+
+          <span class="toolbar-icon-container">
+            <Icon icon="uim:align-left" :height="20" :width="20" />
+          </span>
+          <span class="toolbar-icon-container">
+            <Icon icon="uim:align-right" :height="20" :width="20" />
+          </span>
+          <span class="toolbar-icon-container">
+            <Icon icon="mdi:format-align-centre" :height="20" :width="20" />
+          </span>
+
+          <span class="toolbar-icon-container"
+            ><Icon icon="material-symbols:checklist" :height="20" :width="20"
+          /></span>
+          <span class="toolbar-icon-container"
+            ><Icon icon="pixelarticons:bulletlist" :height="20" :width="20"
+          /></span>
+          <span class="toolbar-icon-container"
+            ><Icon icon="clarity:number-list-line" :height="20" :width="20"
+          /></span>
+        </div>
+        <!-- mobile toolbar end -->
+
+
       <span class="toolbar-icon-container"><ArrowUturnLeftIcon class="toolbar-icon" /></span>
       <span class="toolbar-icon-container"><ArrowUturnRightIcon class="toolbar-icon" /></span>
       <span class="toolbar-icon-container"><PrinterIcon class="toolbar-icon" /></span>
@@ -11,9 +81,9 @@
       </select>
       <div class="toolbar-line-gap"></div>
 
-      <span class="toolbar-icon-container"
-        ><EllipsisVerticalIcon class="toolbar-icon md:hidden"
-      /></span>
+      <span @click="showMobileToolbarExtra=!showMobileToolbarExtra" class="toolbar-icon-container md:hidden"
+        ><EllipsisVerticalIcon class="toolbar-icon md:hidden" />
+      </span>
 
       <select
         name="textType"
@@ -168,6 +238,7 @@ const textType: Ref<string[]> = ref([
 ])
 const showAlignemntToolbar: Ref<boolean> = ref(false)
 const showMdToolbar: Ref<boolean> = ref(false)
+const showMobileToolbarExtra:Ref<boolean>=ref(false)
 </script>
 <style scoped>
 #textSize {

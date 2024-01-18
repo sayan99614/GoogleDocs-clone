@@ -4,7 +4,6 @@
     </header>
     <main>
         <slot name="main">
-            <EditorToolbar/>
         </slot>
     </main>
 </template>

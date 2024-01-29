@@ -8,7 +8,6 @@
     </main>
 </template>
 <script setup lang="ts">
-import EditorToolbar from '@/components/EditorToolbar.vue';
 </script>
 <style scoped>
 </style>

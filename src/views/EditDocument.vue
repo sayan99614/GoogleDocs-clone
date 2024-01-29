@@ -10,8 +10,11 @@
         @makeItallic="makeItalic"
         @undo="undo"
         @redo="redo"
+        @attach-link="linkAttach"
         :isItalic="editor?.isActive('italic')!"
         :isBold="editor?.isActive('bold')!"
+        :showLink="showLink"
+        @toggle-show-link="showLink=!showLink"
       />
       <div class="grid grid-cols-[1fr_1.5fr_1fr]">
         <div
@@ -31,14 +34,22 @@ import DocEditLayout from '@/layout/DocEditLayout.vue'
 import Header from '@/components/Header.vue'
 import Bold from '@tiptap/extension-bold'
 import Italic from '@tiptap/extension-italic'
+import Document from '@tiptap/extension-document'
 import History from '@tiptap/extension-history'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
+import Link from '@tiptap/extension-link'
 
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 
-const isEditing = ref(true)
+const isEditing: Ref<boolean> = ref(true)
+const showLink :Ref<boolean>=ref(false);
+
 const editor = useEditor({
   content: '<p>I’m running Tiptap with Vue.js. 🎉</p>',
-  extensions: [StarterKit, Bold, Italic, History]
+  extensions: [StarterKit, Document, Paragraph, Text, Bold, Italic, Link.configure({
+    openOnClick:false
+  })]
 })
 
 const makeBold = (): void => {
@@ -55,6 +66,12 @@ const undo = (): void => {
 
 const redo = (): void => {
   editor.value?.chain().focus().redo().run()
+}
+
+const linkAttach = (link: string) => {
+
+  editor.value?.chain().focus().extendMarkRange('link').setLink({ href: link }).run();
+  showLink.value=false
 }
 </script>
 <style>

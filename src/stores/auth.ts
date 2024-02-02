@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, type Ref } from 'vue'
+import { useUserStore } from './user'
+import { type User } from './types/userType';
 
 export const useAuthStore = defineStore(
   'auth',
@@ -14,7 +16,16 @@ export const useAuthStore = defineStore(
     const setAccessToken = (token: string) => {
       accessToken.value = token
     }
-    return { isLoggedIn, setIsLoggedIn, accessToken, setAccessToken }
+
+    const { setUser } = useUserStore()
+
+    const logout = (): void => {
+      isLoggedIn.value = false
+      accessToken.value = ''
+      setUser({} as User);
+    }
+
+    return { isLoggedIn, setIsLoggedIn, accessToken, setAccessToken, logout }
   },
   {
     persist: true

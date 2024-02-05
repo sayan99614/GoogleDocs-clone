@@ -40,13 +40,17 @@ import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import Link from '@tiptap/extension-link'
 
-import { ref, type Ref } from 'vue'
+import { onMounted, ref, type Ref } from 'vue'
+import { useDocsStore } from '../stores/document';
+import { storeToRefs } from 'pinia'
+
+const {document}= storeToRefs(useDocsStore())
 
 const isEditing: Ref<boolean> = ref(true)
 const showLink :Ref<boolean>=ref(false);
 
 const editor = useEditor({
-  content: '<p>I’m running Tiptap with Vue.js. 🎉</p>',
+  content: document.value?.content,
   extensions: [StarterKit, Document, Paragraph, Text, Bold, Italic, Link.configure({
     openOnClick:false
   })]
@@ -73,6 +77,12 @@ const linkAttach = (link: string) => {
   editor.value?.chain().focus().extendMarkRange('link').setLink({ href: link }).run();
   showLink.value=false
 }
+
+
+onMounted(()=>{
+  editor.value?.chain().focus()
+})
+
 </script>
 <style>
 .tiptap {

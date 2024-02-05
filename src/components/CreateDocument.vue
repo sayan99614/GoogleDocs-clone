@@ -18,11 +18,38 @@
 </template>
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useDocsStore } from '../stores/document'
+import { useUserStore } from '@/stores/user'
+import { storeToRefs } from 'pinia'
+import { onMounted } from 'vue'
 
 const router = useRouter()
 
-function createNewDoc(): void {
-  router.push('/docs/abc')
+const docsStore = useDocsStore()
+
+const { user } = storeToRefs(useUserStore())
+
+async function createNewDoc(): Promise<void> {
+  const id = await docsStore.createDocument({
+    content: '',
+    title: 'Untitled Document',
+    uId: user.value?.uId,
+    dateModified: formatDate(new Date())
+  })
+
+  router.push(`/docs/${id}`)
+}
+
+onMounted(() => {
+  docsStore.getDocsByUser()
+})
+
+function formatDate(date: Date) {
+  const dd = String(date.getDate()).padStart(2, '0')
+  const mm = String(date.getMonth() + 1).padStart(2, '0') // January is 0!
+  const yyyy = date.getFullYear()
+
+  return `${dd}/${mm}/${yyyy}`
 }
 </script>
 <style scoped>

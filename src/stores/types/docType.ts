@@ -1,6 +1,7 @@
 export type Doc={
-    id?:string
+    id?:string 
     title:string,
     content:string,
-    uId:string
+    uId:string,
+    dateModified: string
 }

@@ -1,6 +1,7 @@
 import { firebaseApp } from '@/firebaseConfig'
 import type { User } from '@/stores/types/userType'
-import { addDoc, collection, getFirestore } from 'firebase/firestore'
+import type { Doc as DocType } from '@/stores/types/docType'
+import { addDoc, collection, getFirestore, getDoc, doc } from 'firebase/firestore'
 const db = getFirestore(firebaseApp)
 
 import { query, where, getDocs } from 'firebase/firestore'
@@ -18,4 +19,26 @@ export const createUser = async (user: User) => {
   if (!_user) {
     addDoc(collection(db, 'users'), user)
   }
+}
+
+export const createNewDoc = async (doc: DocType) => {
+  const _newDoc = await addDoc(collection(db, 'docs'), doc)
+  return _newDoc
+}
+
+export const getAllDocs = async (uId: string): Promise<DocType[]> => {
+  const q = query(collection(db, 'docs'), where('uId', '==', uId))
+  const snapshots = await getDocs(q)
+  return snapshots.docs.map((doc) => {
+    return {
+      ...doc.data(),
+      id: doc.id
+    } as DocType
+  })
+}
+
+export const getDocById = async (id: string): Promise<DocType | null> => {
+  const _doc = await getDoc(doc(db, 'docs', id))
+
+  return _doc.exists() ? ({ ..._doc.data(), id: _doc.id } as DocType) : null
 }

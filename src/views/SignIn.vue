@@ -24,12 +24,12 @@ import { GoogleAuthProvider } from 'firebase/auth'
 import { useUserStore } from '@/stores/user'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
-
+import { createUser } from '../utils/firebasedb'
 const authProvider = new GoogleAuthProvider()
 
 const { setUser } = useUserStore()
 const { setIsLoggedIn, setAccessToken } = useAuthStore()
-const router=useRouter();
+const router = useRouter()
 
 const auth = useFirebaseAuth()!
 const error = ref(null)
@@ -47,13 +47,20 @@ function signinPopup() {
         })
       }
 
+      createUser({
+        email: result.user.email || '',
+        profilePic: result.user.photoURL || '',
+        username: result.user.displayName || '',
+        uId: result.user.uid
+      })
+
       setIsLoggedIn(true)
       setAccessToken(result.user.refreshToken)
       router.replace('/')
     })
     .catch((reason) => {
       console.error('Failed sign', reason)
-      setIsLoggedIn(false);
+      setIsLoggedIn(false)
     })
 }
 </script>

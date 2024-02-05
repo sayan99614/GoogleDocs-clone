@@ -190,9 +190,10 @@
           <LinkForm v-if="showLink" @attach-link="attachLink" />
         </span>
         <span class="toolbar-icon-container relative"
-          ><PhotoIcon class="toolbar-icon" />
+          ><PhotoIcon class="toolbar-icon" @click="showPhotoForm = !showPhotoForm" />
           <!-- TODO -->
           <div
+            v-if="showPhotoForm"
             class="absolute top-10 left-0 bg-[#edf2fa] flex flex-col w-[15rem] z-10"
           >
             <div class="p-2 flex items-center gap-4 hover:bg-slate-200">
@@ -274,6 +275,7 @@ const textType: Ref<string[]> = ref([
 const showAlignemntToolbar: Ref<boolean> = ref(false)
 const showMdToolbar: Ref<boolean> = ref(false)
 const showMobileToolbarExtra: Ref<boolean> = ref(false)
+const showPhotoForm: Ref<boolean> = ref(false)
 
 const props = defineProps<{
   isBold: boolean

@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <header class="relative">
     <div class="flex items-center gap-3">
@@ -68,6 +69,7 @@
       <div class="flex justify-center">
         <button
           class="bg-white hover:shadow transition-all delay-0 rounded-3xl gap-6 flex items-center px-4 py-2"
+          @click="signOut"
         >
           <Icon icon="uit:signout" width="30" height="30" />
           <p class="text-sm md:text-base">Sign out from all accounts</p>
@@ -82,9 +84,12 @@ import { useRouter } from 'vue-router'
 import { LockClosedIcon } from '@heroicons/vue/24/outline'
 import { useUserStore } from '../stores/user'
 import { Icon } from '@iconify/vue'
+import { useAuthStore } from '../stores/auth';
 const router = useRouter()
 
-const { user } = useUserStore()
+const { user } = useUserStore();
+
+const {logout} = useAuthStore();
 
 const showUserAccountPopUp: Ref<boolean> = ref(false)
 
@@ -98,6 +103,13 @@ defineProps({
     default: false
   }
 })
+
+
+const signOut=():void=>{
+  logout();
+  router.replace('/login')
+}
+
 </script>
 <style scoped>
 header {

@@ -12,8 +12,8 @@
               </div>
               <p>Date Created</p>
             </div>
-
-            <template v-for="doc in documents" :key="doc.id">
+            <Loader class="mt-[10rem]" v-if="isLoading"/>
+            <template v-for="doc in documents" :key="doc.id" >
               <Doc :title="doc.title" :date-modified="doc.dateModified!" @click="showDoc(doc.id!)" />
             </template>
           </div>
@@ -35,13 +35,14 @@ import { useDocsStore } from '../stores/document'
 import { storeToRefs } from 'pinia'
 import Doc from '@/components/Doc.vue'
 import router from '../router/index';
+import Loader from '@/components/Loader.vue'
 
 const  docsStore=useDocsStore()
-const { documents } = storeToRefs(docsStore)
+const { documents,isLoading } = storeToRefs(docsStore)
 
 
-const showDoc=(id:string)=>{
-  docsStore.selectDocById(id);
+const showDoc=async(id:string)=>{
+  await docsStore.selectDocById(id);
   router.push(`/docs/${id}`);
 }
 

@@ -1,14 +1,16 @@
 import { defineStore } from 'pinia'
 
-import { computed, ref, type Ref } from 'vue'
-import type { Doc } from './types/docType'
-import { createNewDoc, getAllDocs, getDocById } from '@/utils/firebasedb'
+import { ref, type Ref } from 'vue'
+import type { Doc, updatedData } from './types/docType'
+import { createNewDoc, getAllDocs, getDocById, updateDocument } from '@/utils/firebasedb'
 import { useUserStore } from './user'
 
 export const useDocsStore = defineStore(
   'documents',
   () => {
     const documents: Ref<Doc[]> = ref([])
+
+    const isLoading: Ref<Boolean>= ref(false)
 
     const document: Ref<Doc> = ref({
       uId: '',
@@ -30,10 +32,12 @@ export const useDocsStore = defineStore(
     }
 
     const getDocsByUser = async () => {
+      isLoading.value = true
       const { user } = useUserStore()
 
       if (user.uId) {
         documents.value = await getAllDocs(user.uId)
+        isLoading.value = false
       }
     }
 
@@ -42,9 +46,16 @@ export const useDocsStore = defineStore(
       document.value = doc!
     }
 
-    return { document, createDocument, documents, getDocsByUser, selectDocById }
+    const updateDoc = async (id: string, updatedData: updatedData) => {
+      isLoading.value = true
+      await updateDocument(id, updatedData)
+      await selectDocById(id)
+      isLoading.value = false
+    }
+
+    return { document, createDocument, documents, getDocsByUser, selectDocById, updateDoc,isLoading }
   },
   {
-    persist: true
+    persist: false
   }
 )

@@ -1,7 +1,12 @@
 <template>
   <DocEditLayout>
     <template #header>
-      <Header :isEditing="isEditing" />
+      <Header
+        :isEditing="isEditing"
+        v-model:documentTitle="documentTitle"
+        :documentTitlePlaceHolder="doc.title"
+        :isSaving="isSaving"
+      />
     </template>
 
     <template #main>
@@ -14,7 +19,7 @@
         :isItalic="editor?.isActive('italic')!"
         :isBold="editor?.isActive('bold')!"
         :showLink="showLink"
-        @toggle-show-link="showLink=!showLink"
+        @toggle-show-link="showLink = !showLink"
       />
       <div class="grid grid-cols-[1fr_1.5fr_1fr]">
         <div
@@ -35,25 +40,37 @@ import Header from '@/components/Header.vue'
 import Bold from '@tiptap/extension-bold'
 import Italic from '@tiptap/extension-italic'
 import Document from '@tiptap/extension-document'
-import History from '@tiptap/extension-history'
+
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import Link from '@tiptap/extension-link'
 
-import { onMounted, ref, type Ref } from 'vue'
-import { useDocsStore } from '../stores/document';
+import { onMounted, onUpdated, ref, type Ref } from 'vue'
+import { useDocsStore } from '../stores/document'
 import { storeToRefs } from 'pinia'
 
-const {document}= storeToRefs(useDocsStore())
+const docStore = useDocsStore()
+const { document: doc } = storeToRefs(docStore)
 
 const isEditing: Ref<boolean> = ref(true)
-const showLink :Ref<boolean>=ref(false);
+const showLink: Ref<boolean> = ref(false)
+const isSaving: Ref<boolean> = ref(false)
+
+const documentTitle = ref(doc.value?.title)
 
 const editor = useEditor({
-  content: document.value?.content,
-  extensions: [StarterKit, Document, Paragraph, Text, Bold, Italic, Link.configure({
-    openOnClick:false
-  })]
+  content: doc.value?.content,
+  extensions: [
+    StarterKit,
+    Document,
+    Paragraph,
+    Text,
+    Bold,
+    Italic,
+    Link.configure({
+      openOnClick: false
+    })
+  ]
 })
 
 const makeBold = (): void => {
@@ -73,16 +90,34 @@ const redo = (): void => {
 }
 
 const linkAttach = (link: string) => {
-
-  editor.value?.chain().focus().extendMarkRange('link').setLink({ href: link }).run();
-  showLink.value=false
+  editor.value?.chain().focus().extendMarkRange('link').setLink({ href: link }).run()
+  showLink.value = false
 }
 
-
-onMounted(()=>{
+onMounted(() => {
   editor.value?.chain().focus()
-})
 
+  document.addEventListener(
+    'keydown',
+    function (e) {
+      if (e.key === 's' && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
+        e.preventDefault()
+        isSaving.value = true
+        docStore.updateDoc(doc.value?.id!, {
+          title: documentTitle.value,
+          content: editor.value?.getHTML()!
+        })
+
+        setTimeout(() => {
+          isSaving.value = false
+        }, 1000)
+
+        return
+      }
+    },
+    false
+  )
+})
 </script>
 <style>
 .tiptap {

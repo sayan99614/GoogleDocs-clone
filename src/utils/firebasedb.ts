@@ -1,7 +1,7 @@
 import { firebaseApp } from '@/firebaseConfig'
 import type { User } from '@/stores/types/userType'
 import type { Doc as DocType } from '@/stores/types/docType'
-import { addDoc, collection, getFirestore, getDoc, doc } from 'firebase/firestore'
+import { addDoc, collection, getFirestore, getDoc, doc, updateDoc } from 'firebase/firestore'
 const db = getFirestore(firebaseApp)
 
 import { query, where, getDocs } from 'firebase/firestore'
@@ -41,4 +41,16 @@ export const getDocById = async (id: string): Promise<DocType | null> => {
   const _doc = await getDoc(doc(db, 'docs', id))
 
   return _doc.exists() ? ({ ..._doc.data(), id: _doc.id } as DocType) : null
+}
+
+export const updateDocument = async (id: string, updatedData: any) => {
+  const docRef = doc(db, 'docs', id)
+
+  const isExist: boolean = (await getDoc(docRef)).exists()
+
+  if (isExist === false) throw new Error('Document not found')
+
+  const result = await updateDoc(docRef, updatedData)
+
+  return result
 }

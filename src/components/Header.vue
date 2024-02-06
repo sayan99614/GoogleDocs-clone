@@ -10,8 +10,13 @@
       />
       <h1 v-if="!isEditing" class="text-2xl hidden md:block">Docs</h1>
       <div v-if="isEditing" class="flex flex-col justify-center gap-1">
-        <div class="hidden md:block">
-          <input type="text" placeholder="Unnamed Doc" class="placeholder:text-black" />
+        <div class="hidden md:flex justify-between items-center gap-6">
+          <input
+            type="text"
+            v-model="documentTitle"
+            class="placeholder:text-black"
+          />
+          <p v-show="isSaving" class="transition-all duration-75">saving...</p>
         </div>
         <div class="hidden md:flex gap-3 cursor-pointer">
           <p>File</p>
@@ -84,12 +89,12 @@ import { useRouter } from 'vue-router'
 import { LockClosedIcon } from '@heroicons/vue/24/outline'
 import { useUserStore } from '../stores/user'
 import { Icon } from '@iconify/vue'
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from '../stores/auth'
 const router = useRouter()
 
-const { user } = useUserStore();
+const { user } = useUserStore()
 
-const {logout} = useAuthStore();
+const { logout } = useAuthStore()
 
 const showUserAccountPopUp: Ref<boolean> = ref(false)
 
@@ -101,15 +106,23 @@ defineProps({
   isEditing: {
     type: Boolean,
     default: false
+  },
+  documentTitlePlaceHolder: {
+    type: String,
+    default: ''
+  },
+  isSaving: {
+    type: Boolean,
+    default: false
   }
 })
 
+const documentTitle = defineModel('documentTitle')
 
-const signOut=():void=>{
-  logout();
+const signOut = (): void => {
+  logout()
   router.replace('/login')
 }
-
 </script>
 <style scoped>
 header {

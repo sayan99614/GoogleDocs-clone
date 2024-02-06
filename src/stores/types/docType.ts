@@ -5,3 +5,9 @@ export type Doc={
     uId:string,
     dateModified: string
 }
+
+export type updatedData={
+    title?:string,
+    content?:string,
+    dateModified?:string
+}

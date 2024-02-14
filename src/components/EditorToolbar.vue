@@ -39,7 +39,10 @@
             I
           </div></span
         >
-        <span @click="emit('underLine')" class="toolbar-icon-container"
+
+        <span
+          @click="emit('underLine')"
+          :class="['toolbar-icon-container', { active: isUnderLine }]"
           ><div
             class="toolbar-icon font-bold flex items-center justify-center border-b-2 border-black"
           >
@@ -90,17 +93,18 @@
         class="toolbar-icon-container md:hidden"
         ><EllipsisVerticalIcon class="toolbar-icon md:hidden" />
       </span>
-
+      <!-- TODO:heading..... -->
       <select
         name="textType"
         id="textType"
         class="md:block hidden toolbar-icon-container outline-none"
+        v-model="selectTextType"
       >
         <option
-          :selected="_type === 'Normal Text'"
           v-for="(_type, index) in textType"
+          :selected="_type === _type[0]"
           :key="index + _type[0]"
-          value="zoom"
+          :value="_type"
         >
           {{ _type }}
         </option>
@@ -120,6 +124,7 @@
         <span class="toolbar-icon-container"><MinusIcon class="toolbar-icon" /></span>
       </div>
       <div class="toolbar-line-gap hide-small"></div>
+      <!-- Desktop 🖥  -->
       <div class="hidden md:flex items-center gap-3">
         <span
           @click="emit('makeBold')"
@@ -131,7 +136,9 @@
             I
           </div></span
         >
-        <span @click="emit('underLine')" class="toolbar-icon-container"
+        <span
+          @click="emit('underLine')"
+          :class="['toolbar-icon-container', { active: isUnderLine }]"
           ><div
             class="toolbar-icon font-bold flex items-center justify-center border-b-2 border-black"
           >
@@ -211,7 +218,7 @@
           </div>
         </span>
         <div class="toolbar-line-gap"></div>
-
+        <!-- Desktop -->
         <span
           @click="showAlignemntToolbar = !showAlignemntToolbar"
           class="toolbar-icon-container relative"
@@ -220,13 +227,22 @@
             v-show="showAlignemntToolbar"
             class="absolute p-1 rounded-lg top-10 bg-[#edf2fa] flex gap-4"
           >
-            <span class="toolbar-icon-container">
+            <span
+              :class="['toolbar-icon-container', { active: isAlignLeft }]"
+              @click="emit('alignLeft')"
+            >
               <Icon icon="uim:align-left" :height="20" :width="20" />
             </span>
-            <span class="toolbar-icon-container">
+            <span
+              :class="['toolbar-icon-container', { active: isAlignRight }]"
+              @click="emit('alignRight')"
+            >
               <Icon icon="uim:align-right" :height="20" :width="20" />
             </span>
-            <span class="toolbar-icon-container">
+            <span
+              :class="['toolbar-icon-container', { active: isAlignCenter }]"
+              @click="emit('alignCenter')"
+            >
               <Icon icon="mdi:format-align-centre" :height="20" :width="20" />
             </span>
           </div>
@@ -272,6 +288,9 @@ const textType: Ref<string[]> = ref([
   'Heading 2',
   'Heading 3'
 ])
+
+const selectTextType = defineModel('selectTextType')
+
 const showAlignemntToolbar: Ref<boolean> = ref(false)
 const showMdToolbar: Ref<boolean> = ref(false)
 const showMobileToolbarExtra: Ref<boolean> = ref(false)
@@ -280,9 +299,13 @@ const showPhotoForm: Ref<boolean> = ref(false)
 const props = defineProps<{
   isBold: boolean
   isItalic: boolean
-  canUndo: boolean
-  canRedo: boolean
+  // canUndo: boolean
+  // canRedo: boolean
   showLink: boolean
+  isUnderLine: boolean
+  isAlignCenter: boolean
+  isAlignLeft: boolean
+  isAlignRight: boolean
 }>()
 
 const emit = defineEmits<{
@@ -294,6 +317,9 @@ const emit = defineEmits<{
   underLine: []
   attachLink: [link: string]
   toggleShowLink: []
+  alignRight: []
+  alignLeft: []
+  alignCenter: []
 }>()
 
 const attachLink = (link: string) => {

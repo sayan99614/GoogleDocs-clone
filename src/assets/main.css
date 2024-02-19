@@ -2,24 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
-.toolbar-icon{
-    @apply w-4 h-4 text-black;
+.toolbar-icon {
+  @apply w-4 h-4 text-black;
 }
 
-.toolbar-icon-container{
-    @apply p-1 rounded-md cursor-pointer hover:bg-slate-300 bg-transparent;
+.toolbar-icon-container {
+  @apply p-1 rounded-md cursor-pointer hover:bg-slate-300 bg-transparent;
 }
 
-.active{
-    @apply bg-slate-400
+.active {
+  @apply bg-slate-400;
 }
 
-.toolbar-line-gap{
-    @apply border-l-[1px] border-l-black h-5 opacity-25;
+.toolbar-line-gap {
+  @apply border-l-[1px] border-l-black h-5 opacity-25;
 }
 
-.hide-small{
-    @apply md:block hidden
+.hide-small {
+  @apply md:block hidden;
+}
+
+h1 {
+  @apply text-2xl font-bold;
+}
+
+h2 {
+  @apply text-xl;
+}
+
+h3 {
+  @apply text-lg;
+}
+
+h4 {
+  @apply text-base;
+}
+
+h5 {
+  @apply text-sm;
+}
+
+.ProseMirror > p > a {
+    color: rgb(79, 79, 184);
+    cursor: pointer;
 }

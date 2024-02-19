@@ -5,6 +5,7 @@ import { addDoc, collection, getFirestore, getDoc, doc, updateDoc } from 'fireba
 const db = getFirestore(firebaseApp)
 
 import { query, where, getDocs } from 'firebase/firestore'
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage'
 
 export const getUser = async (uId: string): Promise<User | null> => {
   const q = query(collection(db, 'users'), where('uId', '==', uId))
@@ -54,3 +55,19 @@ export const updateDocument = async (id: string, updatedData: any) => {
 
   return result
 }
+
+
+export const saveFile = async (file:File,userId:string) => {
+  try {
+    const storage = getStorage(firebaseApp);
+    const imageRef = ref(storage, `images/${userId}/` + file.name);
+
+    const snapshot = await uploadBytes(imageRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    return downloadURL;
+  } catch (error) {
+    return new Error("Can't upload image at this moment");
+  }
+};
+

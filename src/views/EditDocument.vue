@@ -20,19 +20,26 @@
         @align-center="alignCenter"
         @align-left="alignLeft"
         @align-right="alighRight"
-        :is-align-center="editor?.isActive({textAlign:'center'})!"
-        :is-align-left="editor?.isActive({textAlign:'left'})!"
-        :is-align-right="editor?.isActive({textAlign:'right'})!"
+        @photo-link="linkPhoto"
+        @toggle-show-link="showLink = !showLink"
+        @create-task-list="createTaskList"
+        @create-bullet-list="createBulletList"
+        @create-number-list="createOrderedList"
+        :is-align-center="editor?.isActive({ textAlign: 'center' })!"
+        :is-align-left="editor?.isActive({ textAlign: 'left' })!"
+        :is-align-right="editor?.isActive({ textAlign: 'right' })!"
         :isItalic="editor?.isActive('italic')!"
         :isBold="editor?.isActive('bold')!"
         :isUnderLine="editor?.isActive('underline')!"
         :showLink="showLink"
-        @toggle-show-link="showLink = !showLink"
+        :is-task-list="editor?.isActive('taskList')!"
+        :is-bullet-list="editor?.isActive('bulletList')!"
+        :is-number-list="editor?.isActive('orderedList')!"
         v-model:selectTextType="selectedTextType"
       />
       <div class="grid grid-cols-[1fr_1.5fr_1fr]">
         <div
-          class="col-start-2 col-end-3 bg-white border-[0.2px] p-4 border-slate-300 mt-5 h-[100vh] break-words"
+          class="col-start-2 col-end-3 bg-white border-[0.2px] p-4 border-slate-300 mt-5 h-full min-h-[100vh] break-words"
         >
           <editor-content :editor="editor" :class="['editor']" />
         </div>
@@ -50,14 +57,18 @@ import Bold from '@tiptap/extension-bold'
 import Italic from '@tiptap/extension-italic'
 import Document from '@tiptap/extension-document'
 import Heading from '@tiptap/extension-heading'
-import TextAlign from '@tiptap/extension-text-align';
+import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
-
+import TaskItem from '@tiptap/extension-task-item'
+import TaskList from '@tiptap/extension-task-list'
+import BulletList from '@tiptap/extension-bullet-list'
+import ListItem from '@tiptap/extension-list-item'
+import OrderedList from '@tiptap/extension-ordered-list'
 import Paragraph from '@tiptap/extension-paragraph'
 
 import Text from '@tiptap/extension-text'
 import Link from '@tiptap/extension-link'
-
+import Image from '@tiptap/extension-image'
 import { onBeforeMount, onMounted, ref, type Ref, watch } from 'vue'
 import { useDocsStore } from '../stores/document'
 import { storeToRefs } from 'pinia'
@@ -88,8 +99,25 @@ const editor = useEditor({
     Underline,
     Heading,
     TextAlign.configure({
-      types:['heading','paragraph']
-    })
+      types: ['heading', 'paragraph']
+    }),
+    Image,
+    TaskList,
+    TaskItem.configure({
+      nested: true
+    }),
+    BulletList.configure({
+      HTMLAttributes: {
+        class: 'list-disc'
+      }
+    }),
+    OrderedList.configure({
+      HTMLAttributes: {
+        class: 'list-decimal'
+      }
+    
+    }),
+    ListItem
   ]
 })
 
@@ -118,15 +146,15 @@ const makeBold = (): void => {
   editor.value?.chain().focus().toggleBold().run()
 }
 
-const alighRight=():void=>{
+const alighRight = (): void => {
   editor.value?.chain().focus().setTextAlign('right').run()
 }
 
-const alignLeft=():void=>{
+const alignLeft = (): void => {
   editor.value?.chain().focus().setTextAlign('left').run()
 }
 
-const alignCenter=():void=>{
+const alignCenter = (): void => {
   editor.value?.chain().focus().setTextAlign('center').run()
 }
 
@@ -142,13 +170,29 @@ const redo = (): void => {
   editor.value?.chain().focus().redo().run()
 }
 
-const generateUnderline=():void=>{
+const generateUnderline = (): void => {
   editor.value?.chain().focus().toggleUnderline().run()
 }
 
 const linkAttach = (link: string) => {
   editor.value?.chain().focus().extendMarkRange('link').setLink({ href: link }).run()
   showLink.value = false
+}
+
+const linkPhoto = (link: string) => {
+  editor.value?.chain().focus().setImage({ src: link }).run()
+}
+
+const createTaskList = (): void => {
+  editor.value?.chain().focus().toggleTaskList().run()
+}
+
+const createBulletList = (): void => {
+  editor.value?.chain().focus().toggleBulletList().run()  
+}
+
+const createOrderedList = (): void => {
+  editor.value?.chain().focus().toggleOrderedList().run()
 }
 
 const route = useRoute()
@@ -191,5 +235,51 @@ onMounted(async () => {
 .tiptap {
   outline: none;
   max-width: 800px;
+}
+
+ul,
+ol {
+  padding: 0 1rem;
+}
+
+ul[data-type='taskList'] {
+  list-style: none;
+  padding: 0;
+
+  p {
+    margin: 0;
+  }
+
+  li {
+    display: flex;
+
+    > label {
+      flex: 0 0 auto;
+      margin-right: 0.5rem;
+      user-select: none;
+    }
+
+    > div {
+      flex: 1 1 auto;
+    }
+
+    ul li,
+    ol li {
+      display: list-item;
+    }
+
+    ul[data-type='taskList'] > li {
+      display: flex;
+    }
+  }
+}
+
+
+.list-disc {
+  list-style-type: disc;
+}
+
+.list-decimal {
+  list-style-type: decimal;
 }
 </style>

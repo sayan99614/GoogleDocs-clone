@@ -203,9 +203,10 @@
             v-if="showPhotoForm"
             class="absolute top-10 left-0 bg-[#edf2fa] flex flex-col w-[15rem] z-10"
           >
-            <div class="p-2 flex items-center gap-4 hover:bg-slate-200">
+            <div class="p-2 flex items-center gap-4 hover:bg-slate-200 relative">
               <ArrowUpTrayIcon class="h-5 w-5" />
               <p class="block">Upload from directory</p>
+              <input @change="handleFileUpload" type="file" class="absolute w-full opacity-0 z-0" />
             </div>
             <div class="p-2 flex items-center gap-4">
               <PaperClipIcon class="h-6 w-6" />
@@ -248,13 +249,20 @@
           </div>
         </span>
 
-        <span class="toolbar-icon-container"
-          ><Icon icon="material-symbols:checklist" :height="20" :width="20"
+        <span
+          :class="['toolbar-icon-container', { active: isTaskList }]"
+          @click="emit('createTaskList')"
+        >
+          <Icon icon="material-symbols:checklist" :height="20" :width="20"
         /></span>
-        <span class="toolbar-icon-container"
+        <span 
+        @click="emit('createBulletList')"
+        :class="['toolbar-icon-container', { active: isBulletList }]"
           ><Icon icon="pixelarticons:bulletlist" :height="20" :width="20"
         /></span>
         <span class="toolbar-icon-container"
+          @click="emit('createNumberList')"
+          :class="['toolbar-icon-container', { active: isNumberList }]"
           ><Icon icon="clarity:number-list-line" :height="20" :width="20"
         /></span>
       </div>
@@ -278,6 +286,8 @@ import {
 import { Icon } from '@iconify/vue'
 import { ref, type Ref } from 'vue'
 import LinkForm from './LinkForm.vue'
+import { saveFile } from '@/utils/firebasedb'
+import { useUserStore } from '../stores/user'
 const zoomValues: Ref<number[]> = ref([50, 75, 100, 125, 150, 200])
 const textSize: Ref<number[]> = ref([8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 96])
 const textType: Ref<string[]> = ref([
@@ -306,6 +316,9 @@ const props = defineProps<{
   isAlignCenter: boolean
   isAlignLeft: boolean
   isAlignRight: boolean
+  isTaskList: boolean,
+  isBulletList: boolean,
+  isNumberList: boolean
 }>()
 
 const emit = defineEmits<{
@@ -320,10 +333,34 @@ const emit = defineEmits<{
   alignRight: []
   alignLeft: []
   alignCenter: []
+  photoLink: [link: string]
+  createTaskList: []
+  createBulletList: []
+  createNumberList: []
 }>()
 
 const attachLink = (link: string) => {
   emit('attachLink', link)
+}
+
+const { user } = useUserStore()
+
+const handleFileUpload = async (payload: Event) => {
+  try {
+    const file = (payload.target as HTMLInputElement).files![0]
+
+    if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/jpg') {
+      throw new Error('Invalid file type')
+    }
+
+    const url = await saveFile(file, user.uId)
+
+    if (url !== '') {
+      emit('photoLink', url as string)
+    }
+  } catch (error: any) {
+    alert(error.message)
+  }
 }
 </script>
 <style scoped>

@@ -18,18 +18,27 @@
             {{ _type }}
           </option>
         </select>
+
+        <!-- TODO: -->
         <div class="flex gap-2 items-center">
-          <span class="toolbar-icon-container"><PlusIcon class="toolbar-icon" /></span>
+          <span @click="incrementFontSize" class="toolbar-icon-container"><PlusIcon class="toolbar-icon" /></span>
           <select
             name="textSize"
             id="textSize"
             class="toolbar-icon-container outline-none border border-black"
+            v-model="selectedFontSize"
+            @change="emit('fontSize', selectedFontSize)"
           >
-            <option :selected="size === 8" v-for="size in textSize" :key="size" value="zoom">
+            <option
+              v-for="size in textSize"
+              :selected="size === selectedFontSize"
+              :key="size"
+              :value="size"
+            >
               {{ size }}
             </option>
           </select>
-          <span class="toolbar-icon-container"><MinusIcon class="toolbar-icon" /></span>
+          <span @click="decrementFontSize" class="toolbar-icon-container"><MinusIcon class="toolbar-icon" /></span>
         </div>
         <span :class="['toolbar-icon-container', { active: isBold }]" @click="emit('makeBold')"
           ><div class="toolbar-icon font-bold flex items-center justify-center">B</div></span
@@ -109,20 +118,28 @@
           {{ _type }}
         </option>
       </select>
+      <!-- Font size desktop -->
       <div class="toolbar-line-gap hide-small"></div>
-      <div class="hidden md:flex gap-2 items-center">
-        <span class="toolbar-icon-container"><PlusIcon class="toolbar-icon" /></span>
-        <select
-          name="textSize"
-          id="textSize"
-          class="toolbar-icon-container outline-none border border-black"
-        >
-          <option :selected="size === 8" v-for="size in textSize" :key="size" value="zoom">
-            {{ size }}
-          </option>
-        </select>
-        <span class="toolbar-icon-container"><MinusIcon class="toolbar-icon" /></span>
-      </div>
+      <div class="flex gap-2 items-center">
+          <span @click="incrementFontSize" class="toolbar-icon-container"><PlusIcon class="toolbar-icon" /></span>
+          <select
+            name="textSize"
+            id="textSize"
+            class="toolbar-icon-container outline-none border border-black"
+            v-model="selectedFontSize"
+            @change="emit('fontSize', selectedFontSize)"
+          >
+            <option
+              v-for="size in textSize"
+              :selected="size === selectedFontSize"
+              :key="size"
+              :value="size"
+            >
+              {{ size }}
+            </option>
+          </select>
+          <span @click="decrementFontSize" class="toolbar-icon-container"><MinusIcon class="toolbar-icon" /></span>
+        </div>
       <div class="toolbar-line-gap hide-small"></div>
       <!-- Desktop 🖥  -->
       <div class="hidden md:flex items-center gap-3">
@@ -214,6 +231,8 @@
                 type="text"
                 class="bg-transparent border-b-[1px] focus:border-slate-400 p-2 border-slate-300 w-full outline-none block transition-all duration-75"
                 placeholder="url"
+                v-model="photoUrl"
+                @keyup="submitPhoto"
               />
             </div>
           </div>
@@ -255,12 +274,13 @@
         >
           <Icon icon="material-symbols:checklist" :height="20" :width="20"
         /></span>
-        <span 
-        @click="emit('createBulletList')"
-        :class="['toolbar-icon-container', { active: isBulletList }]"
+        <span
+          @click="emit('createBulletList')"
+          :class="['toolbar-icon-container', { active: isBulletList }]"
           ><Icon icon="pixelarticons:bulletlist" :height="20" :width="20"
         /></span>
-        <span class="toolbar-icon-container"
+        <span
+          class="toolbar-icon-container"
           @click="emit('createNumberList')"
           :class="['toolbar-icon-container', { active: isNumberList }]"
           ><Icon icon="clarity:number-list-line" :height="20" :width="20"
@@ -300,11 +320,27 @@ const textType: Ref<string[]> = ref([
 ])
 
 const selectTextType = defineModel('selectTextType')
+const selectedFontSize = ref(18)
 
 const showAlignemntToolbar: Ref<boolean> = ref(false)
 const showMdToolbar: Ref<boolean> = ref(false)
 const showMobileToolbarExtra: Ref<boolean> = ref(false)
 const showPhotoForm: Ref<boolean> = ref(false)
+const incrementFontSize=():void=>{
+  const index = textSize.value.indexOf(selectedFontSize.value)
+  if (index < textSize.value.length - 1) {
+    selectedFontSize.value = textSize.value[index + 1]
+    emit('fontSize', selectedFontSize.value)
+  }
+
+}
+const decrementFontSize=():void=>{
+  const index = textSize.value.indexOf(selectedFontSize.value)
+  if (index > 0) {
+    selectedFontSize.value = textSize.value[index - 1]
+    emit('fontSize', selectedFontSize.value)
+  }
+}
 
 const props = defineProps<{
   isBold: boolean
@@ -316,8 +352,8 @@ const props = defineProps<{
   isAlignCenter: boolean
   isAlignLeft: boolean
   isAlignRight: boolean
-  isTaskList: boolean,
-  isBulletList: boolean,
+  isTaskList: boolean
+  isBulletList: boolean
   isNumberList: boolean
 }>()
 
@@ -337,6 +373,7 @@ const emit = defineEmits<{
   createTaskList: []
   createBulletList: []
   createNumberList: []
+  fontSize: [size: number]
 }>()
 
 const attachLink = (link: string) => {
@@ -344,6 +381,7 @@ const attachLink = (link: string) => {
 }
 
 const { user } = useUserStore()
+const photoUrl: Ref<string> = ref('')
 
 const handleFileUpload = async (payload: Event) => {
   try {
@@ -357,9 +395,25 @@ const handleFileUpload = async (payload: Event) => {
 
     if (url !== '') {
       emit('photoLink', url as string)
+      showPhotoForm.value = false
     }
   } catch (error: any) {
     alert(error.message)
+  }
+}
+
+const submitPhoto = (event: KeyboardEvent) => {
+  if (event.key.startsWith('Enter')) {
+    if (
+      /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$/i.test(
+        photoUrl.value
+      )
+    ) {
+      emit('photoLink', photoUrl.value)
+      showPhotoForm.value = false
+    } else {
+      alert('Invalid URL')
+    }
   }
 }
 </script>

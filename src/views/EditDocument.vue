@@ -25,6 +25,7 @@
         @create-task-list="createTaskList"
         @create-bullet-list="createBulletList"
         @create-number-list="createOrderedList"
+        @font-size="selectFontSize"
         :is-align-center="editor?.isActive({ textAlign: 'center' })!"
         :is-align-left="editor?.isActive({ textAlign: 'left' })!"
         :is-align-right="editor?.isActive({ textAlign: 'right' })!"
@@ -35,7 +36,9 @@
         :is-task-list="editor?.isActive('taskList')!"
         :is-bullet-list="editor?.isActive('bulletList')!"
         :is-number-list="editor?.isActive('orderedList')!"
+
         v-model:selectTextType="selectedTextType"
+
       />
       <div class="grid grid-cols-[1fr_1.5fr_1fr]">
         <div
@@ -65,14 +68,18 @@ import BulletList from '@tiptap/extension-bullet-list'
 import ListItem from '@tiptap/extension-list-item'
 import OrderedList from '@tiptap/extension-ordered-list'
 import Paragraph from '@tiptap/extension-paragraph'
+import Typography from '@tiptap/extension-typography'
 
 import Text from '@tiptap/extension-text'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
-import { onBeforeMount, onMounted, ref, type Ref, watch } from 'vue'
+
+
+import { onBeforeMount, onMounted, ref, type Ref, watch, onBeforeUnmount } from 'vue'
 import { useDocsStore } from '../stores/document'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
+import { FontSize } from '../utils/FontSizeSelection';
 
 const docStore = useDocsStore()
 const { document: doc } = storeToRefs(docStore)
@@ -88,11 +95,14 @@ const editor = useEditor({
   content: doc.value?.content,
   extensions: [
     StarterKit,
-    Document,
+    Document.configure({
+
+    }),
     Paragraph,
     Text,
     Bold,
     Italic,
+    Typography,
     Link.configure({
       openOnClick: false
     }),
@@ -101,7 +111,11 @@ const editor = useEditor({
     TextAlign.configure({
       types: ['heading', 'paragraph']
     }),
-    Image,
+    Image.configure({
+      HTMLAttributes: {
+        class: 'editor-img'
+      }
+    }),
     TaskList,
     TaskItem.configure({
       nested: true
@@ -115,11 +129,13 @@ const editor = useEditor({
       HTMLAttributes: {
         class: 'list-decimal'
       }
-    
     }),
-    ListItem
+    ListItem,
+    FontSize
   ]
 })
+
+
 
 watch(selectedTextType, (newValue: string) => {
   switch (newValue) {
@@ -180,7 +196,8 @@ const linkAttach = (link: string) => {
 }
 
 const linkPhoto = (link: string) => {
-  editor.value?.chain().focus().setImage({ src: link }).run()
+  editor.value?.chain().focus().setImage({ src: link }).run();
+  
 }
 
 const createTaskList = (): void => {
@@ -188,11 +205,16 @@ const createTaskList = (): void => {
 }
 
 const createBulletList = (): void => {
-  editor.value?.chain().focus().toggleBulletList().run()  
+  editor.value?.chain().focus().toggleBulletList().run()
 }
 
 const createOrderedList = (): void => {
   editor.value?.chain().focus().toggleOrderedList().run()
+}
+
+const selectFontSize=(size:number):void=>{
+  editor.value?.chain().focus().setFontSize(`${size}`).run()
+  console.log(size) 
 }
 
 const route = useRoute()
@@ -230,6 +252,11 @@ onMounted(async () => {
     false
   )
 })
+
+onBeforeUnmount(()=>{
+  editor.value?.destroy();
+})
+
 </script>
 <style>
 .tiptap {
@@ -245,35 +272,7 @@ ol {
 ul[data-type='taskList'] {
   list-style: none;
   padding: 0;
-
-  p {
-    margin: 0;
-  }
-
-  li {
-    display: flex;
-
-    > label {
-      flex: 0 0 auto;
-      margin-right: 0.5rem;
-      user-select: none;
-    }
-
-    > div {
-      flex: 1 1 auto;
-    }
-
-    ul li,
-    ol li {
-      display: list-item;
-    }
-
-    ul[data-type='taskList'] > li {
-      display: flex;
-    }
-  }
 }
-
 
 .list-disc {
   list-style-type: disc;
@@ -281,5 +280,12 @@ ul[data-type='taskList'] {
 
 .list-decimal {
   list-style-type: decimal;
+}
+
+.editor-img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
 }
 </style>

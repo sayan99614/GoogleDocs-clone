@@ -6,6 +6,9 @@
         v-model:documentTitle="documentTitle"
         :documentTitlePlaceHolder="doc.title"
         :isSaving="isSaving"
+        @downloadDocument="()=>downloadAsFile('editor',documentTitle)"
+        @print-document="printDocument"
+        @deleteDocument="deleteCurrentDocument"
       />
     </template>
 
@@ -26,6 +29,7 @@
         @create-bullet-list="createBulletList"
         @create-number-list="createOrderedList"
         @font-size="selectFontSize"
+        @print-document="printDocument"
         :is-align-center="editor?.isActive({ textAlign: 'center' })!"
         :is-align-left="editor?.isActive({ textAlign: 'left' })!"
         :is-align-right="editor?.isActive({ textAlign: 'right' })!"
@@ -36,15 +40,13 @@
         :is-task-list="editor?.isActive('taskList')!"
         :is-bullet-list="editor?.isActive('bulletList')!"
         :is-number-list="editor?.isActive('orderedList')!"
-
         v-model:selectTextType="selectedTextType"
-
       />
       <div class="grid grid-cols-[1fr_1.5fr_1fr]">
         <div
           class="col-start-2 col-end-3 bg-white border-[0.2px] p-4 border-slate-300 mt-5 h-full min-h-[100vh] break-words"
         >
-          <editor-content :editor="editor" :class="['editor']" />
+          <editor-content id="editor" :editor="editor" :class="['editor']" />
         </div>
       </div>
     </template>
@@ -74,12 +76,13 @@ import Text from '@tiptap/extension-text'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 
-
 import { onBeforeMount, onMounted, ref, type Ref, watch, onBeforeUnmount } from 'vue'
 import { useDocsStore } from '../stores/document'
 import { storeToRefs } from 'pinia'
-import { useRoute } from 'vue-router'
-import { FontSize } from '../utils/FontSizeSelection';
+import { useRoute, useRouter } from 'vue-router';
+import { FontSize } from '../utils/FontSizeSelection'
+import downloadAsFile from '@/utils/donloadAsWord'
+import { deleteDocument } from '../utils/firebasedb';
 
 const docStore = useDocsStore()
 const { document: doc } = storeToRefs(docStore)
@@ -95,9 +98,7 @@ const editor = useEditor({
   content: doc.value?.content,
   extensions: [
     StarterKit,
-    Document.configure({
-
-    }),
+    Document.configure({}),
     Paragraph,
     Text,
     Bold,
@@ -134,8 +135,6 @@ const editor = useEditor({
     FontSize
   ]
 })
-
-
 
 watch(selectedTextType, (newValue: string) => {
   switch (newValue) {
@@ -196,8 +195,7 @@ const linkAttach = (link: string) => {
 }
 
 const linkPhoto = (link: string) => {
-  editor.value?.chain().focus().setImage({ src: link }).run();
-  
+  editor.value?.chain().focus().setImage({ src: link }).run()
 }
 
 const createTaskList = (): void => {
@@ -212,9 +210,9 @@ const createOrderedList = (): void => {
   editor.value?.chain().focus().toggleOrderedList().run()
 }
 
-const selectFontSize=(size:number):void=>{
+const selectFontSize = (size: number): void => {
   editor.value?.chain().focus().setFontSize(`${size}`).run()
-  console.log(size) 
+  console.log(size)
 }
 
 const route = useRoute()
@@ -230,7 +228,17 @@ onBeforeMount(async () => {
 })
 
 onMounted(async () => {
-  editor.value?.chain().focus()
+  editor.value?.chain().focus();
+  document.title = documentTitle.value;
+
+  document.addEventListener(
+    'keydown',function(e){
+      if((navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey) && e.key==='p'){
+        e.preventDefault();
+        printDocument();
+      }
+    })
+
   document.addEventListener(
     'keydown',
     function (e) {
@@ -253,10 +261,63 @@ onMounted(async () => {
   )
 })
 
-onBeforeUnmount(()=>{
-  editor.value?.destroy();
+onBeforeUnmount(() => {
+  editor.value?.destroy()
 })
 
+const printDocument = (): void => {
+  const prtHtml: string = document.getElementById('editor')!.innerHTML
+
+  let stylesHtml = ''
+  for (const node of [...document.querySelectorAll('link[rel="stylesheet"], style')]) {
+    stylesHtml += node.outerHTML
+  }
+
+  // Open the print window
+  const WinPrint = window.open(
+    '',
+    '',
+    'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0'
+  )!
+
+  WinPrint.document.write(`<!DOCTYPE html>
+<html>
+  <head>
+    <title>${documentTitle.value}</title>
+    ${stylesHtml}
+    <style>
+    .ProseMirror{
+      margin:24px;
+      max-height: 842px;     
+    }
+
+    .ProseMirror img{
+      max-width: 100%;
+      max-height: 100%;
+      height: 360px;
+      width: 100%;
+      display: block;
+      margin: 0 auto;
+    }
+
+    </style>
+  </head>
+  <body>
+    ${prtHtml}
+  </body>
+</html>`)
+
+  WinPrint.document.close()
+  WinPrint.focus()
+  WinPrint.print()
+}
+
+const router =useRouter();
+
+const deleteCurrentDocument = async()=> {
+  deleteDocument(doc.value.id as string)
+  router.replace('/')
+}
 </script>
 <style>
 .tiptap {

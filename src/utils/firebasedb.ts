@@ -1,7 +1,15 @@
 import { firebaseApp } from '@/firebaseConfig'
 import type { User } from '@/stores/types/userType'
 import type { Doc as DocType } from '@/stores/types/docType'
-import { addDoc, collection, getFirestore, getDoc, doc, updateDoc } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  getDoc,
+  doc,
+  updateDoc,
+  deleteDoc
+} from 'firebase/firestore'
 const db = getFirestore(firebaseApp)
 
 import { query, where, getDocs } from 'firebase/firestore'
@@ -56,18 +64,27 @@ export const updateDocument = async (id: string, updatedData: any) => {
   return result
 }
 
+export const deleteDocument = async (id: string) => {
+  const docRef = doc(db, 'docs', id)
 
-export const saveFile = async (file:File,userId:string) => {
+  const isExist: boolean = (await getDoc(docRef)).exists()
+
+  if (isExist === false) throw new Error('Document not found')
+
+  const response = await deleteDoc(docRef)
+  return response
+}
+
+export const saveFile = async (file: File, userId: string) => {
   try {
-    const storage = getStorage(firebaseApp);
-    const imageRef = ref(storage, `images/${userId}/` + file.name);
+    const storage = getStorage(firebaseApp)
+    const imageRef = ref(storage, `images/${userId}/` + file.name)
 
-    const snapshot = await uploadBytes(imageRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
+    const snapshot = await uploadBytes(imageRef, file)
+    const downloadURL = await getDownloadURL(snapshot.ref)
 
-    return downloadURL;
+    return downloadURL
   } catch (error) {
-    return new Error("Can't upload image at this moment");
+    return new Error("Can't upload image at this moment")
   }
-};
-
+}

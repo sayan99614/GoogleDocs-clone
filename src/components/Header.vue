@@ -11,7 +11,7 @@
       <h1 v-if="!isEditing" class="text-2xl hidden md:block">Docs</h1>
       <div v-if="isEditing" class="flex flex-col justify-center gap-1">
         <div class="hidden md:flex justify-between items-center gap-6">
-          <input type="text" v-model="documentTitle" class="placeholder:text-black" />
+          <input ref="titleRef" type="text" v-model="documentTitle" class="placeholder:text-black" />
           <p v-show="isSaving" class="transition-all duration-75">saving...</p>
         </div>
         <div class="hidden md:flex gap-3 cursor-pointer relative select-none">
@@ -22,11 +22,11 @@
           <p>Tools</p>
           <div v-show="showfileOptions" class="absolute bg-white top-9 z-50 w-80 p-2">
             <div class="flex flex-col gap-3">
-              <div class="flex gap-2 items-center hover:bg-slate-200 transition-all duration-200">
+              <div class="flex gap-2 items-center hover:bg-slate-200 transition-all duration-200" @click="emit('downloadDocument'); showfileOptions=false">
                 <Icon icon="material-symbols-light:download-sharp" height="28" width="28" />
                 <p>Download</p>
               </div>
-              <div class="flex gap-2 items-center hover:bg-slate-200 transition-all duration-200">
+              <div @click="openMail" class="flex gap-2 items-center hover:bg-slate-200 transition-all duration-200">
                 <Icon
                   icon="material-symbols-light:mark-email-read-outline-sharp"
                   height="28"
@@ -38,16 +38,16 @@
                 <Icon icon="material-symbols-light:share-outline" height="28" width="28" />
                 <p>Share</p>
               </div>
-              <div class="flex gap-2 items-center hover:bg-slate-200 transition-all duration-200">
+              <div @click="renameDocument" class="flex gap-2 items-center hover:bg-slate-200 transition-all duration-200">
                 <Icon icon="mdi:rename-outline" height="28" width="28" />
                 <p>Rename</p>
               </div>
               <div class="border-b border-slate-300"></div>
-              <div class="flex gap-2 items-center hover:bg-slate-200 transition-all duration-200">
+              <div @click="emit('deleteDocument')" class="flex gap-2 items-center hover:bg-slate-200 transition-all duration-200">
                 <Icon icon="material-symbols-light:delete-outline" height="28" width="28" />
                 <p>Delete</p>
               </div>
-              <div class="flex gap-2 items-center hover:bg-slate-200 transition-all duration-200">
+              <div @click="emit('printDocument'); showfileOptions=false" class="flex gap-2 items-center hover:bg-slate-200 transition-all duration-200">
                 <Icon icon="material-symbols-light:print" height="28" width="28" />
                 <p>Print</p>
               </div>
@@ -121,6 +121,7 @@ import { Icon } from '@iconify/vue'
 import { useAuthStore } from '../stores/auth'
 import { useDocsStore } from '@/stores/document'
 import { storeToRefs } from 'pinia';
+
 const router = useRouter()
 const {isLoading} =storeToRefs(useDocsStore())
 
@@ -130,9 +131,21 @@ const { logout } = useAuthStore()
 
 const showUserAccountPopUp: Ref<boolean> = ref(false)
 const showfileOptions: Ref<boolean> = ref(false)
+const titleRef = ref<HTMLInputElement | null>(null)
+
 
 const toggleShowUserAccountPopUp = () => {
   showUserAccountPopUp.value = !showUserAccountPopUp.value
+}
+
+const openMail=()=>{
+  window.open(`mailto:?subject=${documentTitle.value}`)
+  showfileOptions.value=false;
+}
+
+const renameDocument=()=>{
+  titleRef.value?.focus();
+  showfileOptions.value = false
 }
 
 defineProps({
@@ -149,6 +162,14 @@ defineProps({
     default: false
   }
 })
+
+
+const emit= defineEmits<{
+  downloadDocument:[],
+  renameDocument:[],
+  deleteDocument:[],
+  printDocument:[]
+}>()
 
 const documentTitle = defineModel('documentTitle')
 

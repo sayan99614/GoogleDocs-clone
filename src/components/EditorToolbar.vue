@@ -91,7 +91,7 @@
       <span @click="emit('redo')" class="toolbar-icon-container"
         ><ArrowUturnRightIcon class="toolbar-icon"
       /></span>
-      <span class="toolbar-icon-container"><PrinterIcon class="toolbar-icon" /></span>
+      <span class="toolbar-icon-container" @click="emit('printDocument')"><PrinterIcon class="toolbar-icon" /></span>
       <select name="zoom" id="zoom" class="toolbar-icon-container outline-none">
         <option v-for="zoom in zoomValues" :key="zoom" value="zoom">{{ zoom }}%</option>
       </select>
@@ -374,6 +374,7 @@ const emit = defineEmits<{
   createBulletList: []
   createNumberList: []
   fontSize: [size: number]
+  printDocument: []
 }>()
 
 const attachLink = (link: string) => {

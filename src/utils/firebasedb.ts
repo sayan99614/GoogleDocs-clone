@@ -8,7 +8,8 @@ import {
   getDoc,
   doc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  orderBy
 } from 'firebase/firestore'
 const db = getFirestore(firebaseApp)
 
@@ -35,8 +36,8 @@ export const createNewDoc = async (doc: DocType) => {
   return _newDoc
 }
 
-export const getAllDocs = async (uId: string): Promise<DocType[]> => {
-  const q = query(collection(db, 'docs'), where('uId', '==', uId))
+export const getAllDocs = async (uId: string,order:'asc'|'desc'='asc'): Promise<DocType[]> => {
+  const q = query(collection(db, 'docs'), where('uId', '==', uId), orderBy('dateModified', order))
   const snapshots = await getDocs(q)
   return snapshots.docs.map((doc) => {
     return {

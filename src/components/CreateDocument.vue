@@ -21,7 +21,7 @@ import { useRouter } from 'vue-router'
 import { useDocsStore } from '../stores/document'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
-import { onMounted } from 'vue'
+
 
 const router = useRouter()
 
@@ -39,10 +39,6 @@ async function createNewDoc(): Promise<void> {
 
   router.push(`/docs/${id}`)
 }
-
-onMounted(() => {
-  docsStore.getDocsByUser()
-})
 
 function formatDate(date: Date) {
   const dd = String(date.getDate()).padStart(2, '0')

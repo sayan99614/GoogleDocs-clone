@@ -31,12 +31,12 @@ export const useDocsStore = defineStore(
       return _doc.id
     }
 
-    const getDocsByUser = async () => {
+    const getDocsByUser = async (order:'asc'|'desc') => {
       isLoading.value = true
       const { user } = useUserStore()
 
       if (user.uId) {
-        documents.value = await getAllDocs(user.uId)
+        documents.value = await getAllDocs(user.uId,order)
         isLoading.value = false
       }
     }

@@ -56,13 +56,27 @@
         </div>
       </div>
     </div>
-    <div class="flex justify-center items-center">
+    <div class="flex justify-center items-center relative" v-click-outside="clickOutSide">
       <input
         v-if="!isEditing"
         class="w-[60%] px-8 py-2 shadow rounded-lg border-0 focus:shadow-md outline-none"
         type="text"
         placeholder="Search"
+        @focus="handeSearchFocus"
+        @input="searchDocuments"
       />
+      <div v-if="showSerchResults" class="absolute shadow bg-slate-50 top-11 w-[58%] p-4 rounded-b-md" >
+      <p v-if="searchIsLoading">Loading.....</p>
+      <p v-else-if="searchResults.length===0">No results found</p>
+       <template v-else>
+        <div v-for="searchedDoc in searchResults" :key="searchedDoc.id" @click="showDoc(searchedDoc.id!)">
+        <div class="flex w-full gap-2 items-center cursor-pointer hover:bg-slate-200 p-2 rounded-md">
+          <img class="w-5 h-5" src="@/assets/document.png" alt="doc">
+          <p>{{searchedDoc.title}}</p>
+        </div>
+      </div>
+       </template>
+      </div>
     </div>
     <div class="flex items-end justify-end cursor-pointer">
       <div class="flex items-center gap-4">
@@ -121,6 +135,9 @@ import { Icon } from '@iconify/vue'
 import { useAuthStore } from '../stores/auth'
 import { useDocsStore } from '@/stores/document'
 import { storeToRefs } from 'pinia';
+import { searchDocs } from '../utils/firebasedb';
+import type { Doc } from '@/stores/types/docType'
+
 
 const router = useRouter()
 const {isLoading} =storeToRefs(useDocsStore())
@@ -132,7 +149,7 @@ const { logout } = useAuthStore()
 const showUserAccountPopUp: Ref<boolean> = ref(false)
 const showfileOptions: Ref<boolean> = ref(false)
 const titleRef = ref<HTMLInputElement | null>(null)
-
+const showSerchResults: Ref<boolean> = ref(false)
 
 const toggleShowUserAccountPopUp = () => {
   showUserAccountPopUp.value = !showUserAccountPopUp.value
@@ -171,12 +188,52 @@ const emit= defineEmits<{
   printDocument:[]
 }>()
 
-const documentTitle = defineModel('documentTitle')
+const documentTitle = defineModel('documentTitle');
+const docsStore =useDocsStore()
 
 const signOut = (): void => {
   logout()
   router.replace('/login')
 }
+const searchIsLoading=ref<boolean>(false);
+
+const searchResults=ref<Doc[]>([]);
+
+const handeSearchFocus=()=>{
+  showSerchResults.value=true;
+}
+const searchDocuments=async(event:InputEvent|Event):Promise<void>=>{
+  event.preventDefault();
+  searchIsLoading.value=true;
+  const value=(event.target as HTMLInputElement).value;
+
+  if(value.trim()===''){
+    searchResults.value=[];
+    searchIsLoading.value=false;
+    return;
+  }
+
+  let timeoutId:any=null;
+ 
+  clearTimeout(timeoutId);
+  timeoutId=setTimeout(async()=>{
+    searchResults.value =await searchDocs(user.uId,value);
+    searchIsLoading.value=false; 
+  },500)
+
+}
+
+const clickOutSide=()=>{
+  showSerchResults.value=false;
+  searchResults.value=[] as Doc[];
+
+}
+
+const showDoc=async(id:string)=>{
+  await docsStore.selectDocById(id);
+  router.push(`/docs/${id}`);
+}
+
 </script>
 <style scoped>
 header {

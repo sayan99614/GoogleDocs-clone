@@ -247,6 +247,7 @@ onMounted(async () => {
         isSaving.value = true
         docStore.updateDoc(doc.value?.id!, {
           title: documentTitle.value,
+          searchTitle: documentTitle.value.toLowerCase(),
           content: editor.value?.getHTML()!
         })
 

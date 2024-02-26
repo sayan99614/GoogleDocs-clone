@@ -33,6 +33,7 @@ async function createNewDoc(): Promise<void> {
   const id = await docsStore.createDocument({
     content: '',
     title: 'Untitled Document',
+    searchTitle: 'untitled document',
     uId: user.value?.uId,
     dateModified: formatDate(new Date())
   })

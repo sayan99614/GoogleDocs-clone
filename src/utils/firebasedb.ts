@@ -36,7 +36,10 @@ export const createNewDoc = async (doc: DocType) => {
   return _newDoc
 }
 
-export const getAllDocs = async (uId: string,order:'asc'|'desc'='asc'): Promise<DocType[]> => {
+export const getAllDocs = async (
+  uId: string,
+  order: 'asc' | 'desc' = 'asc'
+): Promise<DocType[]> => {
   const q = query(collection(db, 'docs'), where('uId', '==', uId), orderBy('dateModified', order))
   const snapshots = await getDocs(q)
   return snapshots.docs.map((doc) => {
@@ -45,6 +48,27 @@ export const getAllDocs = async (uId: string,order:'asc'|'desc'='asc'): Promise<
       id: doc.id
     } as DocType
   })
+}
+
+export const searchDocs = async (uId: string, search: string): Promise<DocType[]> => {
+  const q = query(
+    collection(db, 'docs'),
+    where('uId', '==', uId),
+  )
+  if(search.trim() !== ''){
+    const snapshots = await getDocs(q)
+  const searchResult = [] as DocType[]
+  snapshots.docs.forEach((doc) => {
+   if(doc.data().searchTitle.includes(search)){
+    searchResult.push({
+      ...doc.data(),
+      id: doc.id
+    } as DocType)
+   }
+  })
+  return searchResult
+  }
+  return [] as DocType[] 
 }
 
 export const getDocById = async (id: string): Promise<DocType | null> => {

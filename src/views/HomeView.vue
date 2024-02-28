@@ -48,6 +48,7 @@ const docsOrder:Ref<'asc'|'desc'>=ref('asc');
 
 
 onMounted(() => {
+  document.title= 'Google Docs Clone'
   docsStore.getDocsByUser(docsOrder.value)
 })
 
